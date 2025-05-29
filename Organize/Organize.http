@@ -1,0 +1,6 @@
+@Organize_HostAddress = http://localhost:5213
+
+GET {{Organize_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
