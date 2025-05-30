@@ -10,6 +10,8 @@ namespace Organize.Models.DTO
         public string PhoneNumber { get; set; } = string.Empty;
         // Foreign key and navigation property
         public required Permission Permission { get; set; }
+        public string Username { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }
 }

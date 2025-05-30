@@ -9,6 +9,6 @@
         public bool CanDelete { get; set; }
 
         // Navigation property
-        public required ICollection<Documents> Documents { get; set; }
+        //public required ICollection<Documents> Documents { get; set; }
     }
 }
