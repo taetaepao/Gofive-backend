@@ -1,7 +1,9 @@
 
 using Microsoft.EntityFrameworkCore; // Ensure this using directive is present
 using Microsoft.OpenApi.Models;
-using Organize.Data; // Add this using directive for Swagger support
+using Organize.Data;
+using Organize.Repositories.Implementation;
+using Organize.Repositories.Interface; // Add this using directive for Swagger support
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +17,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<ApplicationDbContext>();
+builder.Services.AddScoped<IPermissionRepository, PermissionRepository>(); // Ensure this is added for the repository
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 var app = builder.Build();
 
