@@ -43,6 +43,12 @@ namespace Organize.Controllers
         {
             return Ok(await userRepository.GetById(id));
         }
+        [HttpPost]
+        [Route("{id:Guid}")]
+        public async Task<IActionResult> GetUsersById([FromRoute] Guid id,UpdateUsersRequestDTO request)
+        {
+            return Ok(await userRepository.UpdateAsync(id,request));
+        }
 
     }
 }

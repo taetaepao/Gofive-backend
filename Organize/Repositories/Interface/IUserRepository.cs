@@ -8,5 +8,6 @@ namespace Organize.Repositories.Interface
         Task<(bool Success, string Message, UsersDTO? UserDto)> CreateUserWithPermissionAsync(CreateUsersRequestDTO request);
         Task<IEnumerable<GetUsersRequestDTO>> GetAllAsync();
         Task<GetUsersRequestDTO?> GetById(Guid id);
+        Task<Users?> UpdateAsync(Guid id,UpdateUsersRequestDTO request);
     }
 }

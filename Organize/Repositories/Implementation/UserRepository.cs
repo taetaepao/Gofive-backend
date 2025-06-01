@@ -99,6 +99,36 @@ namespace Organize.Repositories.Implementation
             return response;
         }
 
+        public async Task<Users?> UpdateAsync(Guid id,UpdateUsersRequestDTO request)
+        {
+            var permission = await dbContext.Permissions
+                .FirstOrDefaultAsync(p => p.RoleName == request.Permission);
+
+            if (permission == null)
+                return null;
+
+            var user = new Users
+            {
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+                Email = request.Email,
+                PhoneNumber = request.PhoneNumber,
+                UserName = request.Username,
+                Password = request.Password, // Consider hashing in real app
+                PermissionId = permission.Id,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            var existingUser = await dbContext.Users.FirstOrDefaultAsync(x => x.Id == id);
+
+            if (existingUser != null)
+            {
+                dbContext.Entry(existingUser).CurrentValues.SetValues(user);
+                await dbContext.SaveChangesAsync();
+                return user;
+            }
+            return null;
+        }
     }
 
 }
