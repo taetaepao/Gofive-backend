@@ -31,25 +31,18 @@ namespace Organize.Controllers
             return Ok(result.UserDto);
         }
 
-        //[HttpGet]
-        //public async Task<IActionResult> GetAllPermissions()
-        //{
-        //    var permission = await permissionRepository.GetAllAsync();
+        [HttpGet]
+        public async Task<IActionResult> GetAllPermissions()
+        {
+            return Ok(await userRepository.GetAllAsync());
+        }
 
-        //    //Map the domain model to the DTO
-        //    var response = new List<PermissionDTO>();
-        //    foreach (var per in permission)
-        //    {
-        //        response.Add(new PermissionDTO
-        //        {
-        //            RoleName = per.RoleName,
-        //            CanRead = per.CanRead,
-        //            CanWrite = per.CanWrite,
-        //            CanDelete = per.CanDelete
-        //        });
-        //    }
+        [HttpGet]
+        [Route("{id:Guid}")]
+        public async Task<IActionResult> GetUsersById([FromRoute] Guid id)
+        {
+            return Ok(await userRepository.GetById(id));
+        }
 
-        //    return Ok(response);
-        //}
     }
 }

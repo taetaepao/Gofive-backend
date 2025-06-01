@@ -2,7 +2,7 @@
 
 namespace Organize.Models.DTO
 {
-    public class CreateUsersRequestDTO
+    public class GetUsersRequestDTO
     {
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;

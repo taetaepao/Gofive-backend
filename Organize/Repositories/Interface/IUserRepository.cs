@@ -6,7 +6,7 @@ namespace Organize.Repositories.Interface
     public interface IUserRepository
     {
         Task<(bool Success, string Message, UsersDTO? UserDto)> CreateUserWithPermissionAsync(CreateUsersRequestDTO request);
-
-        Task<IEnumerable<Users>> GetAllAsync();
+        Task<IEnumerable<GetUsersRequestDTO>> GetAllAsync();
+        Task<GetUsersRequestDTO?> GetById(Guid id);
     }
 }

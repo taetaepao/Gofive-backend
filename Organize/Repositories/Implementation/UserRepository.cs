@@ -3,6 +3,7 @@ using Organize.Data;
 using Organize.Models.Domain;
 using Organize.Models.DTO;
 using Organize.Repositories.Interface;
+using System.Runtime.InteropServices;
 using System.Security;
 
 namespace Organize.Repositories.Implementation
@@ -55,10 +56,49 @@ namespace Organize.Repositories.Implementation
             return (true, "User created successfully.", userDto);
         }
 
-        public Task<IEnumerable<Users>> GetAllAsync()
+        public async Task<IEnumerable<GetUsersRequestDTO>> GetAllAsync()
         {
-            throw new NotImplementedException();
+
+            var users = await dbContext.Users.Include(u => u.Permission).ToListAsync();
+            var response = new List<GetUsersRequestDTO>();
+            foreach(var user in users)
+            {
+                response.Add(new GetUsersRequestDTO
+                {
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    Permission = user.Permission.RoleName,
+                    Password = user.Password,
+                    UpdatedAt = user.UpdatedAt
+                });
+            }
+
+            return response;
         }
+
+        public async Task<GetUsersRequestDTO?> GetById(Guid id)
+        {
+            var user = await dbContext.Users.Include(u => u.Permission).FirstOrDefaultAsync(x => x.Id == id);
+            if (user is null)
+            {
+                return null;
+            }
+
+            var response = new GetUsersRequestDTO
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                Permission = user.Permission.RoleName,
+                Password = user.Password,
+                UpdatedAt = user.UpdatedAt
+            };
+            return response;
+        }
+
     }
 
 }
