@@ -4,6 +4,7 @@ namespace Organize.Models.DTO
 {
     public class GetUsersRequestDTO
     {
+        public Guid id { get; set; }
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;

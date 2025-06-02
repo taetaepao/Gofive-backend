@@ -9,5 +9,6 @@ namespace Organize.Repositories.Interface
         Task<IEnumerable<GetUsersRequestDTO>> GetAllAsync();
         Task<GetUsersRequestDTO?> GetById(Guid id);
         Task<Users?> UpdateAsync(Guid id,UpdateUsersRequestDTO request);
+        Task<Users?> Delete(Guid id);
     }
 }

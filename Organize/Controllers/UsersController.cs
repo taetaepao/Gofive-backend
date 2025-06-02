@@ -6,6 +6,7 @@ using Organize.Models.Domain;
 using Organize.Models.DTO;
 using Organize.Repositories.Implementation;
 using Organize.Repositories.Interface;
+using System.Runtime.InteropServices;
 
 namespace Organize.Controllers
 {
@@ -49,6 +50,11 @@ namespace Organize.Controllers
         {
             return Ok(await userRepository.UpdateAsync(id,request));
         }
-
+        [HttpDelete]
+        [Route("{id:Guid}")]
+        public async Task<IActionResult> DeleteCategory([FromRoute] Guid id)
+        {
+            return Ok(await userRepository.Delete(id));
+        }
     }
 }

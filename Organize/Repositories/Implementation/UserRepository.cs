@@ -56,6 +56,18 @@ namespace Organize.Repositories.Implementation
             return (true, "User created successfully.", userDto);
         }
 
+        public async Task<Users?> Delete(Guid id)
+        {
+            var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Id == id);
+            if (user is null)
+            {
+                return null;
+            }
+            dbContext.Users.Remove(user);
+            await dbContext.SaveChangesAsync();
+            return user;
+        }
+
         public async Task<IEnumerable<GetUsersRequestDTO>> GetAllAsync()
         {
 
@@ -65,6 +77,7 @@ namespace Organize.Repositories.Implementation
             {
                 response.Add(new GetUsersRequestDTO
                 {
+                    id = user.Id,
                     FirstName = user.FirstName,
                     LastName = user.LastName,
                     Email = user.Email,
@@ -88,6 +101,7 @@ namespace Organize.Repositories.Implementation
 
             var response = new GetUsersRequestDTO
             {
+                id = user.Id,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Email = user.Email,
@@ -99,7 +113,7 @@ namespace Organize.Repositories.Implementation
             return response;
         }
 
-        public async Task<Users?> UpdateAsync(Guid id,UpdateUsersRequestDTO request)
+        public async Task<Users?> UpdateAsync(Guid id, UpdateUsersRequestDTO request)
         {
             var permission = await dbContext.Permissions
                 .FirstOrDefaultAsync(p => p.RoleName == request.Permission);
@@ -107,25 +121,20 @@ namespace Organize.Repositories.Implementation
             if (permission == null)
                 return null;
 
-            var user = new Users
-            {
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                Email = request.Email,
-                PhoneNumber = request.PhoneNumber,
-                UserName = request.Username,
-                Password = request.Password, // Consider hashing in real app
-                PermissionId = permission.Id,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
             var existingUser = await dbContext.Users.FirstOrDefaultAsync(x => x.Id == id);
 
             if (existingUser != null)
             {
-                dbContext.Entry(existingUser).CurrentValues.SetValues(user);
+                existingUser.FirstName = request.FirstName;
+                existingUser.LastName = request.LastName;
+                existingUser.Email = request.Email;
+                existingUser.PhoneNumber = request.PhoneNumber;
+                existingUser.UserName = request.Username;
+                existingUser.Password = request.Password; // Consider hashing
+                existingUser.PermissionId = permission.Id;
+                existingUser.UpdatedAt = DateTime.UtcNow;
                 await dbContext.SaveChangesAsync();
-                return user;
+                return existingUser;
             }
             return null;
         }
