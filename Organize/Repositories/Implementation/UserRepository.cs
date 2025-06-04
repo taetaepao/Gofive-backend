@@ -90,12 +90,30 @@ namespace Organize.Repositories.Implementation
 
             return response;
         }
-        public async Task<GetUsersPagedRequestDTO> GetByPageAsync(int page,int pageSize)
+        public async Task<GetUsersPagedRequestDTO> GetByPageAsync(int page,int pageSize,string sortBy, string search)
         {
             var query = dbContext.Users
                 .Include(u => u.Permission)
                 .OrderByDescending(u => u.UpdatedAt)
                 .AsQueryable();
+
+            // Search
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                string lowerSearch = search.ToLower();
+                query = query.Where(u =>
+                    u.FirstName.ToLower().Contains(lowerSearch) ||
+                    u.LastName.ToLower().Contains(lowerSearch) ||
+                    u.Permission.RoleName.ToLower().Contains(lowerSearch));
+            }
+            // Sorting
+            query = sortBy.ToLower() switch
+            {
+                "name" => query.OrderBy(u => u.FirstName).ThenBy(u => u.LastName),
+                "role" => query.OrderBy(u => u.Permission.RoleName),
+                "updatedat" => query.OrderByDescending(u => u.UpdatedAt),
+                _ => query.OrderBy(u => u.FirstName)
+            };
 
             var totalCount = await query.CountAsync();
 

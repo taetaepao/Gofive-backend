@@ -1,4 +1,5 @@
 ﻿using Organize.Models.Domain;
+using Organize.Models.DTO;
 
 namespace Organize.Repositories.Interface
 {
@@ -6,6 +7,7 @@ namespace Organize.Repositories.Interface
     {
         Task<Permission> CreateAsync(Permission permission);
         Task<IEnumerable<Permission>> GetAllAsync();
+        Task<Permission?> UpdateAsync(Guid id, UpdatePermissionRequestDTO request);
         Task<Permission?> Delete(Guid id);
     }
 }

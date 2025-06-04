@@ -46,7 +46,7 @@ namespace Organize.Controllers
         }
         [HttpPost]
         [Route("{id:Guid}")]
-        public async Task<IActionResult> GetUsersById([FromRoute] Guid id, UpdateUsersRequestDTO request)
+        public async Task<IActionResult> UpdateUsers([FromRoute] Guid id, UpdateUsersRequestDTO request)
         {
             return Ok(await userRepository.UpdateAsync(id, request));
         }
@@ -58,9 +58,9 @@ namespace Organize.Controllers
         }
         [HttpGet]
         [Route("Pages")]
-        public async Task<IActionResult> GetUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 3, [FromQuery] string sortBy = "updatedat", [FromQuery] string? search = null)
         {
-            return Ok(await userRepository.GetByPageAsync(page, pageSize));
+            return Ok(await userRepository.GetByPageAsync(page, pageSize,sortBy,search));
         }
     }
 }

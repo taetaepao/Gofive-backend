@@ -54,11 +54,12 @@ namespace Organize.Controllers
             var permission = await permissionRepository.GetAllAsync();
 
             //Map the domain model to the DTO
-            var response = new List<PermissionDTO>();
+            var response = new List<GetPermissionRequestDTO>();
             foreach (var per in permission)
             {
-                response.Add(new PermissionDTO
+                response.Add(new GetPermissionRequestDTO
                 {
+                    Id = per.Id,
                     RoleName = per.RoleName,
                     CanRead = per.CanRead,
                     CanWrite = per.CanWrite,
@@ -68,7 +69,12 @@ namespace Organize.Controllers
 
             return Ok(response);
         }
-
+        [HttpPost]
+        [Route("{id:Guid}")]
+        public async Task<IActionResult> UpdatePermission([FromRoute] Guid id, UpdatePermissionRequestDTO request)
+        {
+            return Ok(await permissionRepository.UpdateAsync(id, request));
+        }
         [HttpDelete]
         [Route("{id:Guid}")]
         public async Task<IActionResult> DeletePermision([FromRoute] Guid id)
