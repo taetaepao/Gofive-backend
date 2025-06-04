@@ -6,5 +6,6 @@ namespace Organize.Repositories.Interface
     {
         Task<Permission> CreateAsync(Permission permission);
         Task<IEnumerable<Permission>> GetAllAsync();
+        Task<Permission?> Delete(Guid id);
     }
 }

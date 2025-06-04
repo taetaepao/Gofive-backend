@@ -71,7 +71,7 @@ namespace Organize.Repositories.Implementation
         public async Task<IEnumerable<GetUsersRequestDTO>> GetAllAsync()
         {
 
-            var users = await dbContext.Users.Include(u => u.Permission).ToListAsync();
+            var users = await dbContext.Users.Include(u => u.Permission).OrderByDescending(u => u.UpdatedAt).ToListAsync();
             var response = new List<GetUsersRequestDTO>();
             foreach(var user in users)
             {
@@ -90,7 +90,38 @@ namespace Organize.Repositories.Implementation
 
             return response;
         }
+        public async Task<GetUsersPagedRequestDTO> GetByPageAsync(int page,int pageSize)
+        {
+            var query = dbContext.Users
+                .Include(u => u.Permission)
+                .OrderByDescending(u => u.UpdatedAt)
+                .AsQueryable();
 
+            var totalCount = await query.CountAsync();
+
+            var users = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var response = new List<GetUsersRequestDTO>();
+            foreach (var user in users)
+            {
+                response.Add(new GetUsersRequestDTO
+                {
+                    id = user.Id,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    Permission = user.Permission.RoleName,
+                    Password = user.Password,
+                    UpdatedAt = user.UpdatedAt
+                });
+            }
+
+            return new GetUsersPagedRequestDTO { Totalcount = totalCount,Users = response };
+        }
         public async Task<GetUsersRequestDTO?> GetById(Guid id)
         {
             var user = await dbContext.Users.Include(u => u.Permission).FirstOrDefaultAsync(x => x.Id == id);
@@ -107,12 +138,12 @@ namespace Organize.Repositories.Implementation
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
                 Permission = user.Permission.RoleName,
-                Password = user.Password,
+                Username = user.UserName,
+                //Password = user.Password,
                 UpdatedAt = user.UpdatedAt
             };
             return response;
         }
-
         public async Task<Users?> UpdateAsync(Guid id, UpdateUsersRequestDTO request)
         {
             var permission = await dbContext.Permissions
@@ -138,6 +169,7 @@ namespace Organize.Repositories.Implementation
             }
             return null;
         }
+
     }
 
 }

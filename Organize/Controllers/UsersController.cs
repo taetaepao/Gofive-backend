@@ -46,15 +46,21 @@ namespace Organize.Controllers
         }
         [HttpPost]
         [Route("{id:Guid}")]
-        public async Task<IActionResult> GetUsersById([FromRoute] Guid id,UpdateUsersRequestDTO request)
+        public async Task<IActionResult> GetUsersById([FromRoute] Guid id, UpdateUsersRequestDTO request)
         {
-            return Ok(await userRepository.UpdateAsync(id,request));
+            return Ok(await userRepository.UpdateAsync(id, request));
         }
         [HttpDelete]
         [Route("{id:Guid}")]
         public async Task<IActionResult> DeleteCategory([FromRoute] Guid id)
         {
             return Ok(await userRepository.Delete(id));
+        }
+        [HttpGet]
+        [Route("Pages")]
+        public async Task<IActionResult> GetUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            return Ok(await userRepository.GetByPageAsync(page, pageSize));
         }
     }
 }

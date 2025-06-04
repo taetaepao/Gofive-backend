@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Organize.Data;
 using Organize.Models.Domain;
 using Organize.Models.DTO;
+using Organize.Repositories.Implementation;
 using Organize.Repositories.Interface;
 using System.Security;
 
@@ -66,6 +67,13 @@ namespace Organize.Controllers
             }
 
             return Ok(response);
+        }
+
+        [HttpDelete]
+        [Route("{id:Guid}")]
+        public async Task<IActionResult> DeletePermision([FromRoute] Guid id)
+        {
+            return Ok(await permissionRepository.Delete(id));
         }
     }
 }
