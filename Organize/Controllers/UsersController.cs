@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Organize.Data;
@@ -7,6 +9,7 @@ using Organize.Models.DTO;
 using Organize.Repositories.Implementation;
 using Organize.Repositories.Interface;
 using System.Runtime.InteropServices;
+using System.Security.Claims;
 
 namespace Organize.Controllers
 {
@@ -61,6 +64,32 @@ namespace Organize.Controllers
         public async Task<IActionResult> GetUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 3, [FromQuery] string sortBy = "updatedat", [FromQuery] string? search = null)
         {
             return Ok(await userRepository.GetByPageAsync(page, pageSize,sortBy,search));
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login(LoginRequestDTO request)
+        {
+            var result = await userRepository.Login(request);
+            if (!result.Success)
+                return Unauthorized("Invalid username or password");
+
+            return Ok(new { token = result.Token });
+        }
+        [Authorize]
+        [HttpGet("me")]
+        public IActionResult GetMe()
+        {
+            // Get username from the JWT claims
+            var username = User.Identity?.Name;
+
+            // Optional: Get user ID
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            return Ok(new
+            {
+                Username = username,
+                UserId = userId
+            });
         }
     }
 }

@@ -11,7 +11,6 @@ namespace Organize.Models.DTO
         // Foreign key and navigation property
         public required Permission Permission { get; set; }
         public string Username { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }
 }

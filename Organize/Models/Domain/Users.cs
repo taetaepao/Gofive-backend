@@ -13,9 +13,12 @@
         public Permission Permission { get; set; }
 
         public string UserName { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
+        //public string Password { get; set; } = string.Empty;
+
+        public string PasswordHash { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
         // Additional properties can be added as needed
     }
+
 }

@@ -1,10 +1,16 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Organize.Controllers;
 using Organize.Data;
 using Organize.Models.Domain;
 using Organize.Models.DTO;
 using Organize.Repositories.Interface;
+using System.IdentityModel.Tokens.Jwt;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Security.Claims;
+using System.Text;
 
 namespace Organize.Repositories.Implementation
 {
@@ -24,7 +30,7 @@ namespace Organize.Repositories.Implementation
 
             if (permission == null)
                 return (false, "Invalid permission role name.", null);
-
+            var passwordHasher = new PasswordHasher();
             var user = new Users
             {
                 FirstName = request.FirstName,
@@ -32,11 +38,12 @@ namespace Organize.Repositories.Implementation
                 Email = request.Email,
                 PhoneNumber = request.PhoneNumber,
                 UserName = request.Username,
-                Password = request.Password, // Consider hashing in real app
                 PermissionId = permission.Id,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
+
+            user.PasswordHash = passwordHasher.HashPassword(user, request.Password);
 
             await dbContext.Users.AddAsync(user);
             await dbContext.SaveChangesAsync();
@@ -48,7 +55,6 @@ namespace Organize.Repositories.Implementation
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
                 Username = user.UserName,
-                Password = user.Password, // Again: don't expose passwords in production
                 Permission = user.Permission,
                 UpdatedAt = user.UpdatedAt
             };
@@ -73,7 +79,7 @@ namespace Organize.Repositories.Implementation
 
             var users = await dbContext.Users.Include(u => u.Permission).OrderByDescending(u => u.UpdatedAt).ToListAsync();
             var response = new List<GetUsersRequestDTO>();
-            foreach(var user in users)
+            foreach (var user in users)
             {
                 response.Add(new GetUsersRequestDTO
                 {
@@ -83,14 +89,13 @@ namespace Organize.Repositories.Implementation
                     Email = user.Email,
                     PhoneNumber = user.PhoneNumber,
                     Permission = user.Permission.RoleName,
-                    Password = user.Password,
                     UpdatedAt = user.UpdatedAt
                 });
             }
 
             return response;
         }
-        public async Task<GetUsersPagedRequestDTO> GetByPageAsync(int page,int pageSize,string sortBy, string search)
+        public async Task<GetUsersPagedRequestDTO> GetByPageAsync(int page, int pageSize, string sortBy, string search)
         {
             var query = dbContext.Users
                 .Include(u => u.Permission)
@@ -133,12 +138,11 @@ namespace Organize.Repositories.Implementation
                     Email = user.Email,
                     PhoneNumber = user.PhoneNumber,
                     Permission = user.Permission.RoleName,
-                    Password = user.Password,
                     UpdatedAt = user.UpdatedAt
                 });
             }
 
-            return new GetUsersPagedRequestDTO { Totalcount = totalCount,Users = response };
+            return new GetUsersPagedRequestDTO { Totalcount = totalCount, Users = response };
         }
         public async Task<GetUsersRequestDTO?> GetById(Guid id)
         {
@@ -171,6 +175,7 @@ namespace Organize.Repositories.Implementation
                 return null;
 
             var existingUser = await dbContext.Users.FirstOrDefaultAsync(x => x.Id == id);
+            var PasswordHasher = new PasswordHasher();
 
             if (existingUser != null)
             {
@@ -179,7 +184,7 @@ namespace Organize.Repositories.Implementation
                 existingUser.Email = request.Email;
                 existingUser.PhoneNumber = request.PhoneNumber;
                 existingUser.UserName = request.Username;
-                existingUser.Password = request.Password; // Consider hashing
+                existingUser.PasswordHash = PasswordHasher.HashPassword(existingUser, request.Password); // Use the instance of PasswordHasher
                 existingUser.PermissionId = permission.Id;
                 existingUser.UpdatedAt = DateTime.UtcNow;
                 await dbContext.SaveChangesAsync();
@@ -187,7 +192,42 @@ namespace Organize.Repositories.Implementation
             }
             return null;
         }
+        public async Task<LoginResultDTO> Login(LoginRequestDTO request)
+        {
+            var user = await dbContext.Users.FirstOrDefaultAsync(u => u.UserName == request.Username);
+            if (user == null)
+                return new LoginResultDTO { Success = false };
 
+            var passwordHasher = new PasswordHasher();
+            bool isValid = passwordHasher.VerifyPassword(user, user.PasswordHash, request.Password);
+            if (!isValid)
+                return new LoginResultDTO { Success = false };
+
+            // JWT setup
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("your_super_secret_key_1234567890123456")); // or get from config
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: "your_app",
+                audience: "your_app",
+                claims: claims,
+                expires: DateTime.UtcNow.AddHours(1),
+                signingCredentials: creds
+            );
+
+            string jwt = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return new LoginResultDTO
+            {
+                Success = true,
+                Token = jwt
+            };
+        }
     }
-
 }

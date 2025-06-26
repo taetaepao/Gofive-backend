@@ -12,5 +12,6 @@ namespace Organize.Repositories.Interface
             
         Task<Users?> UpdateAsync(Guid id,UpdateUsersRequestDTO request);
         Task<Users?> Delete(Guid id);
+        Task<LoginResultDTO> Login(LoginRequestDTO request);
     }
 }
